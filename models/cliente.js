@@ -18,26 +18,26 @@ module.exports = (sequelize, DataTypes) => {
       nombre: {
         type: DataTypes.STRING,
         allowNull: false,
-      correo: DataTypes.STRING,
-      numLic: DataTypes.STRING
-    },
-    correo: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-      validate: {
-        isEmail: true, //validación de correo electrónico
+        // correo: DataTypes.STRING,
+        // numLic: DataTypes.STRING
+      },
+      correo: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+        validate: {
+          isEmail: true, //validación de correo electrónico
+        },
+      },
+      numLic:{
+        type:DataTypes.STRING,
+        allowNull: false,
+      },
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false,                 
       },
     },
-    numLic:{
-      type:DataTypes.STRING,
-      allowNull: false,
-    },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: false,                 
-    },
-  },
   { 	
 
     sequelize,
@@ -45,8 +45,19 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'clientes',
     hooks: {
       //hook para encriptar la contraseña antes de crear un registro
-      beforeCreate: async (cliente) =>{
-        if (cliente.password && cliente.changed('password')){
+      beforeCreate: async (cliente) => {
+        if (cliente.password) {
+          const salt = await bcrypt.genSalt(10);
+          cliente.password = await bcrypt.hash(cliente.password, salt);
+        }
+      },
+      //hook para encriptar la contraseña antes de actualizar un registro
+      // beforeCreate: async (cliente) =>{
+      //   if (cliente.password && cliente.changed('password')){
+      //     const salt = await bcrypt.genSalt(10);
+      //     cliente.password = await bcrypt.hash(cliente.password, salt);
+      beforeUpdate: async (cliente) => {
+        if (cliente.password && cliente.changed('password')) {
           const salt = await bcrypt.genSalt(10);
           cliente.password = await bcrypt.hash(cliente.password, salt);
         }
